@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
+	"github.com/vannleonheart/goutil"
 	"strings"
 )
 
@@ -24,30 +23,14 @@ func (c *Client) PublicApiCall(uri string) (*[]byte, error) {
 		return nil, errors.New("public api base url can not be empty")
 	}
 
-	httpClient := http.Client{}
-
 	endpoint := fmt.Sprintf("%s/%s", c.Config.PublicApiBaseUrl, uri)
 
-	httpRequest, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	respBody, err := goutil.SendHttpGet(endpoint, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := httpClient.Do(httpRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &respBody, nil
+	return respBody, nil
 }
 
 func (c *Client) PublicApiCallWithCustomResult(uri string, result interface{}) error {

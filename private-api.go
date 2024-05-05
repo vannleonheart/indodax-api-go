@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/vannleonheart/goutil"
 	"strings"
 	"time"
 )
@@ -43,24 +44,26 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 		}
 	}
 
-	reqHeader := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-		"Key":          c.Credential.TradeApiKey,
-		"Sign":         generateSign(reqBody, c.Credential.TradeApiSecret),
-	}
-
-	targetUrl := fmt.Sprintf("%s/tapi", c.Config.PrivateApiBaseUrl)
-
-	resp, err := sendRequest(targetUrl, &reqBody, &reqHeader)
+	signature, err := c.generateSign(reqBody)
 	if err != nil {
 		return err
 	}
 
-	if err = json.Unmarshal(*resp, result); err != nil {
-		return err
+	if signature == nil || len(*signature) <= 0 {
+		return errors.New("error when generate signature")
 	}
 
-	return nil
+	reqHeader := map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+		"Key":          c.Credential.TradeApiKey,
+		"Sign":         *signature,
+	}
+
+	targetUrl := fmt.Sprintf("%s/tapi", c.Config.PrivateApiBaseUrl)
+
+	_, err = goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result)
+
+	return err
 }
 
 func (c *Client) GetInfo() (*GetInfoResponseBody, error) {
