@@ -337,7 +337,7 @@ func (c *Client) GetOrderByClientOrderId(clientOrderId string) (*GetOrderRespons
 	return &ret, nil
 }
 
-func (c *Client) Trade(tradeType, pair, orderType string, price, amount float64, timeInForce, clientOrderId *string) (*ResponseBody, error) {
+func (c *Client) Trade(tradeType, pair, orderType string, price, amount float64, timeInForce, clientOrderId *string, forceCoinAmount bool) (*ResponseBody, error) {
 	slPair := strings.Split(pair, "_")
 	if len(slPair) != 2 {
 		return nil, errors.New("invalid pair")
@@ -352,14 +352,12 @@ func (c *Client) Trade(tradeType, pair, orderType string, price, amount float64,
 		"order_type": orderType,
 	}
 
+	reqBody[coinId] = amount
+
 	switch tradeType {
-	case TradeTypeSell:
-		reqBody[coinId] = amount
 	case TradeTypeBuy:
-		if orderType == OrderTypeMarket {
+		if orderType == OrderTypeMarket && !forceCoinAmount {
 			reqBody[currencyId] = amount
-		} else {
-			reqBody[coinId] = amount
 		}
 	}
 
