@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/vannleonheart/goutil"
+	"strings"
 )
 
 func New(config *Config) *Client {
@@ -42,4 +43,23 @@ func (c *Client) generateSign(data map[string]interface{}) (*string, error) {
 	signature := hex.EncodeToString(h.Sum(nil))
 
 	return &signature, nil
+}
+
+func (c *Client) getNetworkName(network string) string {
+	network = strings.ToLower(network)
+
+	switch network {
+	case "bsc":
+		network = "bep20"
+	case "eth", "homestead":
+		network = "erc20"
+	case "matic", "polygon":
+		network = "polygon"
+	case "arbitrum":
+		network = "arb"
+	case "optimism":
+		network = "op"
+	}
+
+	return network
 }
