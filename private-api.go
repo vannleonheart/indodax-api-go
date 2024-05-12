@@ -348,11 +348,14 @@ func (c *Client) Trade(tradeType, pair, orderType string, price, amount float64,
 	reqBody := map[string]interface{}{
 		"pair":       pair,
 		"type":       tradeType,
-		"price":      price,
 		"order_type": orderType,
 	}
 
 	reqBody[coinId] = amount
+
+	if orderType != OrderTypeMarket {
+		reqBody["price"] = price
+	}
 
 	switch tradeType {
 	case TradeTypeBuy:
