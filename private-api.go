@@ -469,7 +469,7 @@ func (c *Client) Withdraw(requestId, currency, address, network, amount, memo st
 	}
 
 	if len(network) > 0 {
-		network = c.getNetworkName(network)
+		network = c.getNetworkName(currency, network)
 
 		reqBody["network"] = network
 	}
@@ -495,13 +495,13 @@ func (c *Client) Withdraw(requestId, currency, address, network, amount, memo st
 	return &result, nil
 }
 
-func (c *Client) GetWithdrawFee(coinId string, coinNetwork *string) (*map[string]interface{}, error) {
+func (c *Client) GetWithdrawFee(currency string, coinNetwork *string) (*map[string]interface{}, error) {
 	reqBody := map[string]interface{}{
-		"currency": coinId,
+		"currency": currency,
 	}
 
 	if coinNetwork != nil && len(*coinNetwork) > 0 {
-		reqBody["network"] = c.getNetworkName(*coinNetwork)
+		reqBody["network"] = c.getNetworkName(currency, *coinNetwork)
 	}
 
 	resp, err := c.PrivateApiCall(MethodWithdrawFee, &reqBody)

@@ -45,7 +45,7 @@ func (c *Client) generateSign(data map[string]interface{}) (*string, error) {
 	return &signature, nil
 }
 
-func (c *Client) getNetworkName(network string) string {
+func (c *Client) getNetworkName(currency, network string) string {
 	network = strings.ToLower(network)
 
 	switch network {
@@ -53,6 +53,9 @@ func (c *Client) getNetworkName(network string) string {
 		network = "bep20"
 	case "eth", "homestead":
 		network = "erc20"
+		if currency == "eth" {
+			network = "eth"
+		}
 	case "matic", "polygon":
 		network = "polygon"
 	case "arbitrum":
