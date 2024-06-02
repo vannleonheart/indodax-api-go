@@ -20,16 +20,51 @@ func (c *Client) PrivateApiCall(method string, data *map[string]interface{}) (*R
 }
 
 func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]interface{}, result interface{}) error {
-	if c.Config == nil {
-		return errors.New("config is not set")
+	if len(c.Config.PrivateApiBaseUrl) == 0 {
+		err := errors.New("private api base url is required")
+
+		var errData map[string]interface{}
+
+		if data != nil {
+			errData = *data
+		}
+
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "private api base url is required when calling private api",
+			"data": map[string]interface{}{
+				"config": c.Config,
+				"method": method,
+				"data":   errData,
+			},
+		})
+
+		return err
 	}
 
-	if len(c.Config.PrivateApiBaseUrl) == 0 {
-		return errors.New("private api base url can not be empty")
-	}
+	targetUrl := fmt.Sprintf("%s/tapi", c.Config.PrivateApiBaseUrl)
 
 	if c.Credential == nil {
-		return errors.New("credential is required")
+		err := errors.New("credential is required")
+
+		var errData map[string]interface{}
+
+		if data != nil {
+			errData = *data
+		}
+
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "credential is required when calling private api",
+			"data": map[string]interface{}{
+				"config": c.Config,
+				"url":    targetUrl,
+				"method": method,
+				"data":   errData,
+			},
+		})
+
+		return err
 	}
 
 	reqBody := map[string]interface{}{
@@ -46,11 +81,33 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 
 	signature, err := c.generateSign(reqBody)
 	if err != nil {
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "error generate signature when calling private api",
+			"data": map[string]interface{}{
+				"config":  c.Config,
+				"url":     targetUrl,
+				"request": reqBody,
+			},
+		})
+
 		return err
 	}
 
 	if signature == nil || len(*signature) <= 0 {
-		return errors.New("error when generate signature")
+		err = errors.New("signature is required")
+
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "signature is required when calling private api",
+			"data": map[string]interface{}{
+				"config":  c.Config,
+				"url":     targetUrl,
+				"request": reqBody,
+			},
+		})
+
+		return err
 	}
 
 	reqHeader := map[string]string{
@@ -59,11 +116,44 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 		"Sign":         *signature,
 	}
 
-	targetUrl := fmt.Sprintf("%s/tapi", c.Config.PrivateApiBaseUrl)
+	raw, err := goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result)
 
-	_, err = goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result)
+	var responseBodyRaw []byte
 
-	return err
+	if raw != nil {
+		responseBodyRaw = *raw
+	}
+
+	if err != nil {
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "error send http post when calling private api",
+			"data": map[string]interface{}{
+				"config":       c.Config,
+				"url":          targetUrl,
+				"header":       reqHeader,
+				"request":      reqBody,
+				"response_raw": responseBodyRaw,
+				"response":     result,
+			},
+		})
+
+		return err
+	}
+
+	c.log("debug", map[string]interface{}{
+		"message": "success send http post when calling private api",
+		"data": map[string]interface{}{
+			"config":       c.Config,
+			"url":          targetUrl,
+			"header":       reqHeader,
+			"request":      reqBody,
+			"response_raw": responseBodyRaw,
+			"response":     result,
+		},
+	})
+
+	return nil
 }
 
 func (c *Client) GetInfo() (*GetInfoResponseBody, error) {

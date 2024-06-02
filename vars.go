@@ -3,13 +3,22 @@ package indodax
 import "encoding/json"
 
 type Client struct {
-	Config     *Config
+	Config     Config
 	Credential *Credential
 }
 
 type Config struct {
-	PublicApiBaseUrl  string `json:"public_api_base_url"`
-	PrivateApiBaseUrl string `json:"private_api_base_url"`
+	PublicApiBaseUrl  string     `json:"public_api_base_url"`
+	PrivateApiBaseUrl string     `json:"private_api_base_url"`
+	Log               *LogConfig `json:"log_path"`
+}
+
+type LogConfig struct {
+	Enable    bool   `json:"enable"`
+	Path      string `json:"path"`
+	Filename  string `json:"filename"`
+	Extension string `json:"extension"`
+	Rotation  string `json:"rotation"`
 }
 
 type Credential struct {

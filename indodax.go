@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func New(config *Config) *Client {
+func New(config Config) *Client {
 	return &Client{Config: config}
 }
 
@@ -22,6 +22,33 @@ func (c *Client) WithCredential(tradeApiKey, tradeApiSecret string) *Client {
 	return c
 }
 
+/*
+ * Logging
+ *
+ * @param string level
+ * @param interface{} data
+ *
+ * @return void
+ */
+func (c *Client) log(level string, data interface{}) {
+	if c.Config.Log != nil && c.Config.Log.Enable {
+		msg := map[string]interface{}{
+			"level": level,
+			"data":  data,
+		}
+
+		_ = goutil.WriteJsonToFile(msg, c.Config.Log.Path, c.Config.Log.Filename, c.Config.Log.Extension, c.Config.Log.Rotation)
+	}
+}
+
+/*
+ * Generate signature
+ *
+ * @param map[string]interface{} data
+ *
+ * @return *string
+ * @return error
+ */
 func (c *Client) generateSign(data map[string]interface{}) (*string, error) {
 	queryString, err := goutil.GenerateQueryString(data)
 	if err != nil {
@@ -45,6 +72,14 @@ func (c *Client) generateSign(data map[string]interface{}) (*string, error) {
 	return &signature, nil
 }
 
+/*
+ * Adjust network name
+ *
+ * @param string currency
+ * @param string network
+ *
+ * @return string
+ */
 func (c *Client) getNetworkName(currency, network string) string {
 	network = strings.ToLower(network)
 

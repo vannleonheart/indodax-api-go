@@ -12,23 +12,64 @@ func (c *Client) PublicApiCall(uri string) (*[]byte, error) {
 	uri = strings.TrimSpace(strings.Trim(uri, "/"))
 
 	if len(uri) == 0 {
-		return nil, errors.New("uri can not be empty")
-	}
+		err := errors.New("uri can not be empty")
 
-	if c.Config == nil {
-		return nil, errors.New("config is not set")
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "uri can not be empty when calling public api",
+			"data": map[string]string{
+				"uri": uri,
+			},
+		})
+
+		return nil, err
 	}
 
 	if len(c.Config.PublicApiBaseUrl) == 0 {
-		return nil, errors.New("public api base url can not be empty")
+		err := errors.New("public api base url can not be empty")
+
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "public api base url can not be empty when calling public api",
+			"data": map[string]interface{}{
+				"uri":    uri,
+				"config": c.Config,
+			},
+		})
+
+		return nil, err
 	}
 
 	endpoint := fmt.Sprintf("%s/%s", c.Config.PublicApiBaseUrl, uri)
 
 	respBody, err := goutil.SendHttpGet(endpoint, nil, nil, nil)
+
+	var rs string
+
+	if respBody != nil {
+		rs = string(*respBody)
+	}
+
 	if err != nil {
+		c.log("error", map[string]interface{}{
+			"error":   err.Error(),
+			"message": "failed to send http get request when calling public api",
+			"data": map[string]interface{}{
+				"url":      endpoint,
+				"response": rs,
+			},
+		})
+
 		return nil, err
 	}
+
+	c.log("debug", map[string]interface{}{
+		"message": "public api call success",
+		"data": map[string]interface{}{
+			"url":      endpoint,
+			"response": rs,
+		},
+	})
 
 	return respBody, nil
 }
