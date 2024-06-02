@@ -15,6 +15,7 @@ type Config struct {
 
 type LogConfig struct {
 	Enable    bool   `json:"enable"`
+	Level     string `json:"level"`
 	Path      string `json:"path"`
 	Filename  string `json:"filename"`
 	Extension string `json:"extension"`

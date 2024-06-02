@@ -32,6 +32,10 @@ func (c *Client) WithCredential(tradeApiKey, tradeApiSecret string) *Client {
  */
 func (c *Client) log(level string, data interface{}) {
 	if c.Config.Log != nil && c.Config.Log.Enable {
+		if c.Config.Log.Level == "error" && level != "error" {
+			return
+		}
+
 		msg := map[string]interface{}{
 			"level": level,
 			"data":  data,

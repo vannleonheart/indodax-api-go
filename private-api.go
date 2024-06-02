@@ -33,7 +33,6 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 			"error":   err.Error(),
 			"message": "private api base url is required when calling private api",
 			"data": map[string]interface{}{
-				"config": c.Config,
 				"method": method,
 				"data":   errData,
 			},
@@ -57,7 +56,6 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 			"error":   err.Error(),
 			"message": "credential is required when calling private api",
 			"data": map[string]interface{}{
-				"config": c.Config,
 				"url":    targetUrl,
 				"method": method,
 				"data":   errData,
@@ -85,7 +83,6 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 			"error":   err.Error(),
 			"message": "error generate signature when calling private api",
 			"data": map[string]interface{}{
-				"config":  c.Config,
 				"url":     targetUrl,
 				"request": reqBody,
 			},
@@ -101,7 +98,6 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 			"error":   err.Error(),
 			"message": "signature is required when calling private api",
 			"data": map[string]interface{}{
-				"config":  c.Config,
 				"url":     targetUrl,
 				"request": reqBody,
 			},
@@ -118,10 +114,10 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 
 	raw, err := goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result)
 
-	var responseBodyRaw []byte
+	var responseBodyRaw string
 
 	if raw != nil {
-		responseBodyRaw = *raw
+		responseBodyRaw = string(*raw)
 	}
 
 	if err != nil {
@@ -129,12 +125,10 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 			"error":   err.Error(),
 			"message": "error send http post when calling private api",
 			"data": map[string]interface{}{
-				"config":       c.Config,
-				"url":          targetUrl,
-				"header":       reqHeader,
-				"request":      reqBody,
-				"response_raw": responseBodyRaw,
-				"response":     result,
+				"url":      targetUrl,
+				"header":   reqHeader,
+				"request":  reqBody,
+				"response": responseBodyRaw,
 			},
 		})
 
@@ -144,12 +138,10 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 	c.log("debug", map[string]interface{}{
 		"message": "success send http post when calling private api",
 		"data": map[string]interface{}{
-			"config":       c.Config,
-			"url":          targetUrl,
-			"header":       reqHeader,
-			"request":      reqBody,
-			"response_raw": responseBodyRaw,
-			"response":     result,
+			"url":      targetUrl,
+			"header":   reqHeader,
+			"request":  reqBody,
+			"response": responseBodyRaw,
 		},
 	})
 

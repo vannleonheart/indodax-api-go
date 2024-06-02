@@ -32,8 +32,7 @@ func (c *Client) PublicApiCall(uri string) (*[]byte, error) {
 			"error":   err.Error(),
 			"message": "public api base url can not be empty when calling public api",
 			"data": map[string]interface{}{
-				"uri":    uri,
-				"config": c.Config,
+				"uri": uri,
 			},
 		})
 
