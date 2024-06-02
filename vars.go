@@ -10,7 +10,7 @@ type Client struct {
 type Config struct {
 	PublicApiBaseUrl  string     `json:"public_api_base_url"`
 	PrivateApiBaseUrl string     `json:"private_api_base_url"`
-	Log               *LogConfig `json:"log_path"`
+	Log               *LogConfig `json:"log"`
 }
 
 type LogConfig struct {
