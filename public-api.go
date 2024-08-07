@@ -41,7 +41,7 @@ func (c *Client) PublicApiCall(uri string) (*[]byte, error) {
 
 	endpoint := fmt.Sprintf("%s/%s", c.Config.PublicApiBaseUrl, uri)
 
-	respBody, err := goutil.SendHttpGet(endpoint, nil, nil, nil)
+	respBody, err := goutil.SendHttpGet(endpoint, nil, nil, nil, nil)
 
 	var rs string
 

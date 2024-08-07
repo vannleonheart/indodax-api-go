@@ -112,7 +112,7 @@ func (c *Client) PrivateApiCallWithCustomResult(method string, data *map[string]
 		"Sign":         *signature,
 	}
 
-	raw, err := goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result)
+	raw, err := goutil.SendHttpPost(targetUrl, &reqBody, &reqHeader, result, nil)
 
 	var responseBodyRaw string
 
